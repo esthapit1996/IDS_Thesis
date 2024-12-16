@@ -1,0 +1,54 @@
+Here’s a visual example of how the `log_anomaly` function works:
+
+### Setup
+- `ANOMALY_LOG = {}` initially.
+- `NOTIFICATION_TIMEOUT = 600` (10 minutes).
+
+### Example Flow
+
+#### Time: 0 seconds
+1. A new anomaly `"192.168.1.10:1024 --> 10.0.0.5:80"` is detected.
+2. `log_anomaly("192.168.1.10:1024 --> 10.0.0.5:80")` is called.
+   - Since the anomaly isn't in `ANOMALY_LOG`, it adds this entry with the current timestamp: `ANOMALY_LOG = {"192.168.1.10:1024 --> 10.0.0.5:80": 0}`.
+   - It returns `True` to allow notification.
+
+**Output**:
+- `"IP-Anomaly found"`
+- `"Anomaly Details: 192.168.1.10:1024 --> 10.0.0.5:80"`
+
+#### Time: 100 seconds
+3. The same anomaly is detected again.
+4. `log_anomaly("192.168.1.10:1024 --> 10.0.0.5:80")` is called.
+   - It finds the anomaly in `ANOMALY_LOG` with a last notification time of `0`.
+   - `current_time - last_notified = 100 - 0 = 100`, which is less than `NOTIFICATION_TIMEOUT (600)`.
+   - It returns `False`.
+
+**Output**: No notification is sent.
+
+#### Time: 650 seconds
+5. The same anomaly is detected again.
+6. `log_anomaly("192.168.1.10:1024 --> 10.0.0.5:80")` is called.
+   - It finds the anomaly in `ANOMALY_LOG` with a last notification time of `0`.
+   - `current_time - last_notified = 650 - 0 = 650`, which is greater than `NOTIFICATION_TIMEOUT (600)`.
+   - It updates `ANOMALY_LOG` to `{"192.168.1.10:1024 --> 10.0.0.5:80": 650}`.
+   - It returns `True`.
+
+**Output**:
+- `"IP-Anomaly found"`
+- `"Anomaly Details: 192.168.1.10:1024 --> 10.0.0.5:80"`
+
+#### Time: 1300 seconds
+7. The anomaly is detected again after another 650 seconds.
+8. `log_anomaly("192.168.1.10:1024 --> 10.0.0.5:80")` is called.
+   - It finds the anomaly in `ANOMALY_LOG` with a last notification time of `650`.
+   - `current_time - last_notified = 1300 - 650 = 650`, which is greater than `NOTIFICATION_TIMEOUT (600)`.
+   - It updates `ANOMALY_LOG` to `{"192.168.1.10:1024 --> 10.0.0.5:80": 1300}`.
+   - It returns `True`.
+
+**Output**:
+- `"IP-Anomaly found"`
+- `"Anomaly Details: 192.168.1.10:1024 --> 10.0.0.5:80"`
+
+### Key Points
+- The function ensures that each anomaly type is only notified once every 10 minutes.
+- The `ANOMALY_LOG` dictionary is continuously updated to track the last notification times.

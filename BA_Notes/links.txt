@@ -1,0 +1,4 @@
+
+Promiscuous Mode vs Monitor mode:
+https://medium.com/@debookee/promiscuous-vs-monitoring-mode-d603601f5fa
+https://emlogic.no/2024/01/wi-fi-sniffing-with-wireshark/

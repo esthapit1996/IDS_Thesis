@@ -1,0 +1,6 @@
+latex:
+https://wch.github.io/latexsheet/latexsheet-0.png
+python:
+https://www.w3schools.com/python/
+Klassendiagram:
+https://online.visual-paradigm.com/

@@ -1,0 +1,16 @@
+Whitelist:
+216.58.206.42 : https --> 192.168.50.31 : > 1024 -done
+*:https ist erlaubt & rueckrichtung -done
+WENN DEST PORT < 1024 ist, gibt es eine warnung -done
+
+Bereiche von Ports und IP Addresses(Netmask) -done
+
+
+alles grosser als 1024 als 1024 setzen - done
+
+syslog deamon schicken: https://docs.python.org/3/library/syslog.html
+facility=syslog.LOG_MAIL brauche ich nicht.
+
+python liste anlegen, die Warnung prueft mit Timeout(10 min)
+
+Kozept und implementation anfangen :)
