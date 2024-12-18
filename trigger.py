@@ -2,6 +2,9 @@ from scapy.all import *
 import re
 import os
 import time
+import syslog
+import subprocess
+from alert_system import send_alert
 
 ANOMALY_TYPE = ""
 ANOMALY_DETECTED = False
@@ -11,6 +14,10 @@ NOTIFICATION_TIMEOUT = 600 #in seconds
 
 WHITELIST_FOLDER = "filtered_files"
 WHITELIST_FILE = os.path.join(WHITELIST_FOLDER, "whitelist.txt")
+
+def init_syslog():
+    syslog.openlog(ident="IDS_Mailer", logoption=syslog.LOG_PID)
+    
 
 def load_whitelist():
     whitelist = set()
@@ -33,11 +40,11 @@ def load_whitelist():
                     whitelist.add((src, src_port, dst, dst_port))
 
     except FileNotFoundError:
-        print(f"Error: Whitelist file not found at {WHITELIST_FILE}.")
+        syslog.syslog(syslog.LOG_ERR, f"Error: Whitelist file not found at {WHITELIST_FILE}.")
         exit(1)
 
     except Exception as e:
-        print(f"Error while reading whitelist file: {e}")
+        syslog.syslog(syslog.LOG_ERR, f"Error while reading whitelist file: {e}")
         exit(1)
 
     return whitelist
@@ -81,7 +88,7 @@ def is_packet_allowed(packet, whitelist):
                     return True
 
             # If no conditions matched, it is an anomaly
-            ANOMALY_TYPE = f"Unknown IP/Port pair: {src_ip}:{real_src_port} --> {dst_ip}:{real_dst_port}"
+            ANOMALY_TYPE = f"Unknown IP/Port pair: {src_ip}:{src_port} --> {dst_ip}:{dst_port}"
             ANOMALY_DETECTED = True
             return False
             
@@ -92,17 +99,22 @@ def log_anomaly(anomaly):
     if anomaly in ANOMALY_LOG:
         last_notified = ANOMALY_LOG[anomaly]
         if current_time - last_notified < NOTIFICATION_TIMEOUT:
-            return false  #donot notidy if within timeout
-        ANOMALY_LOG[anomaly] = current_time
-        print("DEBUG[log_anomaly]: ANOMALY_LOG[anomaly]")
-        return True
+            return False  #do not tidy if within timeout
+    ANOMALY_LOG[anomaly] = current_time
+    print("DEBUG[log_anomaly]: ANOMALY_LOG[anomaly]")
+    
+    syslog.syslog(syslog.LOG_WARNING, f"Anomaly detected: {anomaly}")
+    
+    send_alert(anomaly)
+    
+    return True
 
 def process_packet(packet):
     global ANOMALY_TYPE, ANOMALY_DETECTED
 
     if not is_packet_allowed(packet, WHITELIST):
         if log_anomaly(ANOMALY_TYPE):
-            print("IP-Anomaly found")
+            print("Anomaly found!!!")
             print(f"Anomaly Details: {ANOMALY_TYPE}")
         
     ANOMALY_TYPE = ""
@@ -110,20 +122,28 @@ def process_packet(packet):
 
 def main():
     global WHITELIST
+    
+    init_syslog()
+    syslog.syslog(syslog.LOG_INFO, "Starting IDS with mail-related logging.")
 
     WHITELIST = load_whitelist()
-    print(f"Whitelist loaded from {WHITELIST_FILE}.")
+    syslog.syslog(syslog.LOG_INFO, f"Whitelist loaded from {WHITELIST_FILE}.")
 
     interface = "enx207bd2471872"  # Ethernet
     # interface = "wlp0s20f3"  # Wireless interface
 
     print(f"Monitoring packets through interface {interface}...")
+    syslog.syslog(syslog.LOG_INFO, f"Monitoring packets on interface {interface}.")
 
     try:
         sniff(iface=interface, filter="ip", prn=process_packet, store=0)
 
     except KeyboardInterrupt:
+        syslog.syslog(syslog.LOG_INFO, "Packet monitoring stopped by user.")
         print("Packet monitoring stopped by user.")
+        
+    finally:
+        syslog.closelog()
 
 if __name__ == "__main__":
     main()

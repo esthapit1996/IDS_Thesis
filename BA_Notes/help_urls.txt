@@ -4,3 +4,5 @@ python:
 https://www.w3schools.com/python/
 Klassendiagram:
 https://online.visual-paradigm.com/
+sysloglevels:
+https://www.cisco.com/c/en/us/td/docs/routers/access/wireless/software/guide/SysMsgLogging.html

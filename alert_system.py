@@ -1,13 +1,21 @@
 import subprocess
+import syslog
 
-EMAIL_BODY = "[TEST] Anamoly in Network detected"
-SUBJECT = "[TEST] NETWORK ANAMOLY DETECTED"
+SUBJECT = "NETWORK ANAMOLY DETECTED"
 RECIPIENT = "evan@evan-XPS-15-9520"
 
-try:
-    command = f'echo "{EMAIL_BODY}" | mail -s "{SUBJECT}" {RECIPIENT}'
-    subprocess.run(command, shell=True, check=True)
-    print("Email sent successfully!")
+def send_alert(anomaly_type):
+    email_body = f"Anomaly in Network detected\n\nAnomaly Details:\n{anomaly_type}"
     
-except subprocess.CalledProcessError as e:
-    print(f"Failed to send email: {e}")
+    syslog.syslog(syslog.LOG_INFO, f"Attempting to send email alert for anomaly: {anomaly_type}")
+    
+    try:
+        command = f'echo "{email_body}" | mail -s "{SUBJECT}" {RECIPIENT}'
+        subprocess.run(command, shell=True, check=True)
+        
+        syslog.syslog(syslog.LOG_INFO, "Email sent successfully!")
+        print("Email sent successfully!")
+        
+    except subprocess.CalledProcessError as e:
+        syslog.syslog(syslog.LOG_ERR, f"Failed to send email: {e}")
+        print(f"Failed to send email: {e}")
