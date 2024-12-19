@@ -14,3 +14,10 @@ facility=syslog.LOG_MAIL brauche ich nicht.
 python liste anlegen, die Warnung prueft mit Timeout(10 min)
 
 Kozept und implementation anfangen :)
+
+chmod 600 whitelist.txt ?
+pcap loeschen nach whitelist erstellung ?
+1024 oder 1025?
+
+Bei Erginisse:
+laenge der Whitelist aus pcap?

@@ -1,8 +1,21 @@
 latex:
 https://wch.github.io/latexsheet/latexsheet-0.png
+
 python:
-https://www.w3schools.com/python/
+https://www.w3schools.com/python
+
+regex:
+https://regex101.com/
+
 Klassendiagram:
 https://online.visual-paradigm.com/
+
 sysloglevels:
 https://www.cisco.com/c/en/us/td/docs/routers/access/wireless/software/guide/SysMsgLogging.html
+https://docs.python.org/3/library/syslog.html#syslog.LOG_UUCP
+
+Promiscuous Mode vs Monitor mode:
+https://medium.com/@debookee/promiscuous-vs-monitoring-mode-d603601f5fa
+https://emlogic.no/2024/01/wi-fi-sniffing-with-wireshark/
+
+

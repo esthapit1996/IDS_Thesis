@@ -15,10 +15,6 @@ NOTIFICATION_TIMEOUT = 600 #in seconds
 WHITELIST_FOLDER = "filtered_files"
 WHITELIST_FILE = os.path.join(WHITELIST_FOLDER, "whitelist.txt")
 
-def init_syslog():
-    syslog.openlog(ident="IDS_Mailer", logoption=syslog.LOG_PID)
-    
-
 def load_whitelist():
     whitelist = set()
     try:
@@ -40,11 +36,11 @@ def load_whitelist():
                     whitelist.add((src, src_port, dst, dst_port))
 
     except FileNotFoundError:
-        syslog.syslog(syslog.LOG_ERR, f"Error: Whitelist file not found at {WHITELIST_FILE}.")
+        # syslog.syslog(syslog.LOG_ERR, f"Error: Whitelist file not found at {WHITELIST_FILE}.")
         exit(1)
 
     except Exception as e:
-        syslog.syslog(syslog.LOG_ERR, f"Error while reading whitelist file: {e}")
+        # syslog.syslog(syslog.LOG_ERR, f"Error while reading whitelist file: {e}")
         exit(1)
 
     return whitelist
@@ -101,9 +97,9 @@ def log_anomaly(anomaly):
         if current_time - last_notified < NOTIFICATION_TIMEOUT:
             return False  #do not tidy if within timeout
     ANOMALY_LOG[anomaly] = current_time
-    print("DEBUG[log_anomaly]: ANOMALY_LOG[anomaly]")
     
-    syslog.syslog(syslog.LOG_WARNING, f"Anomaly detected: {anomaly}")
+    syslog.syslog(syslog.LOG_WARNING, f"Anomaly detected: {anomaly}, Time: {time.ctime()}")
+    print(f"Anamoly: {anomaly} logged at {time.ctime()}")
     
     send_alert(anomaly)
     
@@ -114,8 +110,7 @@ def process_packet(packet):
 
     if not is_packet_allowed(packet, WHITELIST):
         if log_anomaly(ANOMALY_TYPE):
-            print("Anomaly found!!!")
-            print(f"Anomaly Details: {ANOMALY_TYPE}")
+            print("Anomaly found and protocolled... Monitoring continued.")
         
     ANOMALY_TYPE = ""
     ANOMALY_DETECTED = False
@@ -123,24 +118,31 @@ def process_packet(packet):
 def main():
     global WHITELIST
     
-    init_syslog()
-    syslog.syslog(syslog.LOG_INFO, "Starting IDS with mail-related logging.")
+    syslog.openlog(ident="IDS_Mailer", logoption=syslog.LOG_PID)
+    # syslog.syslog(syslog.LOG_INFO, "Starting IDS with mail-related logging.")
 
     WHITELIST = load_whitelist()
-    syslog.syslog(syslog.LOG_INFO, f"Whitelist loaded from {WHITELIST_FILE}.")
+    a = len(WHITELIST)
+    print(a)
+    # syslog.syslog(syslog.LOG_INFO, f"Whitelist loaded from {WHITELIST_FILE}.")
 
     interface = "enx207bd2471872"  # Ethernet
     # interface = "wlp0s20f3"  # Wireless interface
 
     print(f"Monitoring packets through interface {interface}...")
-    syslog.syslog(syslog.LOG_INFO, f"Monitoring packets on interface {interface}.")
+    # syslog.syslog(syslog.LOG_INFO, f"Monitoring packets on interface {interface}.")
 
     try:
         sniff(iface=interface, filter="ip", prn=process_packet, store=0)
+        
+    except PermissionError:
+        # syslog.syslog(syslog.LOG_ERR, "Permission denied. Please run with elevated privileges.")
+        print("Permission denied. Please run with elevated privileges.")
+        exit(1)
 
-    except KeyboardInterrupt:
-        syslog.syslog(syslog.LOG_INFO, "Packet monitoring stopped by user.")
-        print("Packet monitoring stopped by user.")
+    except Exception as e:
+        # syslog.syslog(syslog.LOG_ERR, f"Unexpected error: {e}")
+        print(f"Unexpected error: {e}")
         
     finally:
         syslog.closelog()
