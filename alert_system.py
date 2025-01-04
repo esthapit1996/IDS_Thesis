@@ -1,8 +1,12 @@
 import subprocess
 import syslog
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 SUBJECT = "NETWORK ANAMOLY DETECTED"
-RECIPIENT = "evan@evan-XPS-15-9520"
+RECIPIENT = os.getenv('RECIPIENT')
 
 def send_alert(anomaly_type):
     email_body = f"Anomaly in Network detected\n\nAnomaly Details:\n{anomaly_type}"

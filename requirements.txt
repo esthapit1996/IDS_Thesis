@@ -1,3 +1,6 @@
 scapy
 smtplib
 subprocess
+python-dotenv
+syslog
+time

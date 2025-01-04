@@ -8,5 +8,5 @@ Ethernet mode:
 sudo ip link set enx207bd2471872 promisc on
 ip link show enx207bd2471872
 
-Monitor Port:
+SPAN:
 tbc

@@ -21,3 +21,7 @@ pcap loeschen nach whitelist erstellung ?
 
 Bei Erginisse:
 laenge der Whitelist aus pcap?
+
+The whitelist adds a "unique entry" from the pcap data atm and does not check the existing entries in the whitelist.
+This means if i run the white list script again, the same entry will be written again, regardless of it existing
+inside my whitelist.txt or not.

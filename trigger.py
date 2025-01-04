@@ -5,6 +5,9 @@ import time
 import syslog
 import subprocess
 from alert_system import send_alert
+import from dotenv import load_dotenv
+
+load_dotenv()
 
 ANOMALY_TYPE = ""
 ANOMALY_DETECTED = False
@@ -12,8 +15,8 @@ ANOMALY_LOG = {}
 
 NOTIFICATION_TIMEOUT = 600 #in seconds
 
-WHITELIST_FOLDER = "filtered_files"
-WHITELIST_FILE = os.path.join(WHITELIST_FOLDER, "whitelist.txt")
+WHITELIST_FOLDER = os.getenv('OUTPUT_FOLDER')
+WHITELIST_FILE = os.path.join(WHITELIST_FOLDER, os.getenv('WHITELIST'))
 
 def load_whitelist():
     whitelist = set()
@@ -122,12 +125,11 @@ def main():
     # syslog.syslog(syslog.LOG_INFO, "Starting IDS with mail-related logging.")
 
     WHITELIST = load_whitelist()
-    a = len(WHITELIST)
-    print(a)
+    whitelist_length = len(WHITELIST)
+    print(whitelist_length)
     # syslog.syslog(syslog.LOG_INFO, f"Whitelist loaded from {WHITELIST_FILE}.")
 
-    interface = "enx207bd2471872"  # Ethernet
-    # interface = "wlp0s20f3"  # Wireless interface
+    interface = os.getenv('INTERFACE')
 
     print(f"Monitoring packets through interface {interface}...")
     # syslog.syslog(syslog.LOG_INFO, f"Monitoring packets on interface {interface}.")

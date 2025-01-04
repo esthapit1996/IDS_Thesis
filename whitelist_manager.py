@@ -1,14 +1,24 @@
 import os
+import time
 from scapy.all import rdpcap
+from dotenv import load_dotenv
+import stat
 
-PCAP_FILE = "captured_packets.pcap"
-OUTPUT_FOLDER = "filtered_files"
+load_dotenv()
 
-def create_whitelist(pcap_file, output_folder):
+PCAP_FILE = os.getenv('CAPTURE_FILE')
+OUTPUT_FOLDER = os.getenv('OUTPUT_FOLDER')
+
+def create_whitelist(pcap_file, output_file):
     try:
-        packets = rdpcap(pcap_file)
+        existing_entries = set()
+        if os.path.exists(output_file):
+            with open(output_file, 'r') as whitelist:
+                existing_entries = set(line.strip() for line in whitelist)
         
-        whitelist_entries = set()
+        # Parse PCAP file
+        packets = rdpcap(pcap_file)
+        new_entries = set()
         
         for pkt in packets:
             if 'IP' in pkt:
@@ -26,22 +36,36 @@ def create_whitelist(pcap_file, output_folder):
                 entry = f"{dest_ip} : {destination_port} --> {source_ip} : {source_port}"
                 reverse_entry = f"{source_ip} : {source_port} --> {dest_ip} : {destination_port}"
                 
-                whitelist_entries.add(entry)
-                whitelist_entries.add(reverse_entry)
+                new_entries.add(entry)
+                new_entries.add(reverse_entry)
+                
+        unique_new_entries = new_entries - existing_entries
                 
         os.makedirs(os.path.dirname(whitelist_file), exist_ok=True)
         
-        with open(whitelist_file, 'a') as whitelist:
-            whitelist.write("\n".join(whitelist_entries) + "\n")
+        if unique_new_entries:
+            with open(output_file, 'a') as whitelist:
+                whitelist.write("\n".join(unique_new_entries) + "\n")
+            print(f"Added {len(unique_new_entries)} new entries to the whitelist.")
+        else:
+            print("No new entries to add to the whitelist.")
+
+        # Change file permissions to 600            
+        os.chmod(output_file, stat.S_IRUSR | stat.S_IWUSR)
+        print(f"Permissions for {output_file} changed to 600")
         
     except FileNotFoundError as e:
         print(f"Error: {e}")
     except Exception as e:
         print(f"An unexpected error occured while processing the PCAP file: {e}")
-        
+
 if __name__ == "__main__":
-    whitelist_file = os.path.join(OUTPUT_FOLDER, 'whitelist.txt')
+    start_time = time.time()
     
+    whitelist_file = os.path.join(OUTPUT_FOLDER, os.getenv('WHITELIST'))
     create_whitelist(PCAP_FILE, whitelist_file)
+    
+    total_time = time.time() - start_time
+    print(f"Program completed in {total_time:.2f} seconds.")
 
         

@@ -1,9 +1,11 @@
 from scapy.all import *
-import subprocess
+from dotenv import load_dotenv
+import os
 
-CAPTURE_FILE = "captured_packets.pcap"
+load_dotenv()
+
+CAPTURE_FILE = os.getenv('CAPTURE_FILE')
 CAPTURE_WRITER = None
-
 
 def initialize_capture_file():
     global CAPTURE_WRITER
@@ -23,13 +25,15 @@ def main():
     initialize_capture_file()
 
     ## Interface name
-    # interface = "wlp0s20f3"
-    interface = "enx207bd2471872"
+    interface = os.getenv('INTERFACE')
 
     print(f"Sniffing TCP and UDP packets on interface {interface}...")
 
     try:
-        sniff(iface=interface, filter="tcp or udp",prn=process_packet, store=0)
+        sniff(iface=interface,
+              filter="tcp or udp",
+              prn=process_packet, 
+              store=0)
 
     except KeyboardInterrupt:
         print("Packet capture stopped by user.")

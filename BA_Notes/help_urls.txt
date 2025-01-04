@@ -7,7 +7,7 @@ https://www.w3schools.com/python
 regex:
 https://regex101.com/
 
-Klassendiagram:
+Diagram:
 https://online.visual-paradigm.com/
 
 sysloglevels:
@@ -18,4 +18,9 @@ Promiscuous Mode vs Monitor mode:
 https://medium.com/@debookee/promiscuous-vs-monitoring-mode-d603601f5fa
 https://emlogic.no/2024/01/wi-fi-sniffing-with-wireshark/
 
+python-dotenv:
+https://pypi.org/project/python-dotenv/
+
+chmod:
+https://www.tutorialspoint.com/python/os_chmod.htm
 
