@@ -13,15 +13,45 @@ facility=syslog.LOG_MAIL brauche ich nicht.
 
 python liste anlegen, die Warnung prueft mit Timeout(10 min)
 
-Kozept und implementation anfangen :)
+Kozept und implementation anfangen
 
-chmod 600 whitelist.txt ?
-pcap loeschen nach whitelist erstellung ?
-1024 oder 1025?
+chmod 600 whitelist.txt ? DONE
+pcap loeschen nach whitelist erstellung ? MAkefile?
+
+Dynamic ports 1024 oder 1025? 1024 laut https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml
 
 Bei Erginisse:
 laenge der Whitelist aus pcap?
 
 The whitelist adds a "unique entry" from the pcap data atm and does not check the existing entries in the whitelist.
-This means if i run the white list script again, the same entry will be written again, regardless of it existing
-inside my whitelist.txt or not.
+This means if i run the whitelist script again, the same entry will be written again, regardless of it existing
+inside my whitelist.txt or not... SOLVED!
+
+
+
+change permission line to 600 instead of Stat - Done
+
+d = time.time() - time.time(), wie lange dauert function time zu rufen
+total_time = end - start -d -Done
+
+change from sudo python3 script.py to sudo ./script.py - Done
+
+inform user if old or new anamoly - Done
+
+add_to_whitelist()
+add_to_blacklist()
+
+
+Results:
+new whitelist as compressed whitelist for results
+how many diffrent Anaomalies I get from this whitelist in a day
+
+Anwendungsfaelle:
+1. Whitelist erstellen
+2. Anamolie detektieren
+3. Whitelist aktualisieren
+4. Blacklist erstellen
+5. Benutzer benachrichtigen
+
+except handling nur als comment schreiben und nicht detaliert erklaren
+Uebersichtstablle fur die erfullte Anforderungen machen

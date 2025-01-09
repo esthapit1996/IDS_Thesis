@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from scapy.all import *
 from dotenv import load_dotenv
 import os
@@ -10,7 +12,6 @@ CAPTURE_WRITER = None
 def initialize_capture_file():
     global CAPTURE_WRITER
     CAPTURE_WRITER = PcapWriter(CAPTURE_FILE, append=True, sync=True)
-    print(f"Initialized capture file: {CAPTURE_FILE}")
 
 def process_packet(packet):
     global CAPTURE_WRITER

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from scapy.all import *
 import re
 import os
@@ -5,18 +7,20 @@ import time
 import syslog
 import subprocess
 from alert_system import send_alert
-import from dotenv import load_dotenv
+from dotenv import load_dotenv
 
 load_dotenv()
 
 ANOMALY_TYPE = ""
 ANOMALY_DETECTED = False
 ANOMALY_LOG = {}
+ANOMALY_STATUS = "NEW"
 
-NOTIFICATION_TIMEOUT = 600 #in seconds
+NOTIFICATION_TIMEOUT = 5 #in seconds
 
-WHITELIST_FOLDER = os.getenv('OUTPUT_FOLDER')
-WHITELIST_FILE = os.path.join(WHITELIST_FOLDER, os.getenv('WHITELIST'))
+OUTPUT_FOLDER = os.getenv('OUTPUT_FOLDER')
+WHITELIST_FILE = os.path.join(OUTPUT_FOLDER, os.getenv('WHITELIST'))
+UNSORTED_FILE = os.path.join(OUTPUT_FOLDER, os.getenv('UNSORTED_FILE'))
 
 def load_whitelist():
     whitelist = set()
@@ -24,7 +28,7 @@ def load_whitelist():
         with open(WHITELIST_FILE, "r") as file:
             for line in file:
                 line = line.strip()
-                # Parse lines of the format "src_ip : port --> dst_ip : port"
+                # Regex: Parse lines of the format "src_ip : port --> dst_ip : port"
                 match = re.match(r"(\S+)\s*:\s*(\d+)\s*-->\s*(\S+)\s*:\s*(\d+)", line)
                 if match:
                     src, src_port, dst, dst_port = match.groups()
@@ -39,11 +43,11 @@ def load_whitelist():
                     whitelist.add((src, src_port, dst, dst_port))
 
     except FileNotFoundError:
-        # syslog.syslog(syslog.LOG_ERR, f"Error: Whitelist file not found at {WHITELIST_FILE}.")
+        syslog.syslog(syslog.LOG_ERR, f"Error: Whitelist file not found at {WHITELIST_FILE}.")
         exit(1)
 
     except Exception as e:
-        # syslog.syslog(syslog.LOG_ERR, f"Error while reading whitelist file: {e}")
+        syslog.syslog(syslog.LOG_ERR, f"Error while reading whitelist file: {e}")
         exit(1)
 
     return whitelist
@@ -73,12 +77,14 @@ def is_packet_allowed(packet, whitelist):
             if src_port > 1024:
                 src_port = 1024
 
-            src_network = '.'.join(src_ip.split('.')[:3])  # First 3 octets of source IP
-            dst_network = '.'.join(dst_ip.split('.')[:3])  # First 3 octets of destination IP
+            # First 3 octets of source and destination IP
+            src_network = '.'.join(src_ip.split('.')[:3])
+            dst_network = '.'.join(dst_ip.split('.')[:3])
 
             for (whitelist_src, whitelist_src_port, whitelist_dst, whitelist_dst_port) in whitelist:
-                whitelist_src_network = '.'.join(whitelist_src.split('.')[:3])  # First 3 octets of whitelist source IP
-                whitelist_dst_network = '.'.join(whitelist_dst.split('.')[:3])  # First 3 octets of whitelist destination IP
+                # First 3 octets of whitelist source & destination IP
+                whitelist_src_network = '.'.join(whitelist_src.split('.')[:3])  
+                whitelist_dst_network = '.'.join(whitelist_dst.split('.')[:3])
 
                 if (src_network == whitelist_src_network and dst_network == whitelist_dst_network and \
                     src_port == whitelist_src_port and dst_port == whitelist_dst_port) or \
@@ -87,63 +93,92 @@ def is_packet_allowed(packet, whitelist):
                     return True
 
             # If no conditions matched, it is an anomaly
-            ANOMALY_TYPE = f"Unknown IP/Port pair: {src_ip}:{src_port} --> {dst_ip}:{dst_port}"
+            ANOMALY_TYPE = f"Unknown IP/Port pair: {src_ip} : {src_port} --> {dst_ip} : {dst_port}"
             ANOMALY_DETECTED = True
+            unsorted_file(src_ip, src_port, dst_ip, dst_port)
+            # print(f"DEBUG[unsorted]:::  {src_ip} : {src_port} --> {dst_ip} : {dst_port}")
             return False
             
     return True
 
-def log_anomaly(anomaly):
+def log_anomaly(anomaly, anomaly_status):
+    global ANAMOLY_LOG, ANOMALY_STATUS
     current_time = time.time()
+    
     if anomaly in ANOMALY_LOG:
         last_notified = ANOMALY_LOG[anomaly]
         if current_time - last_notified < NOTIFICATION_TIMEOUT:
             return False  #do not tidy if within timeout
+        ANOMALY_STATUS = "OLD"
+    else:
+        ANOMALY_STATUS = "NEW"
     ANOMALY_LOG[anomaly] = current_time
     
-    syslog.syslog(syslog.LOG_WARNING, f"Anomaly detected: {anomaly}, Time: {time.ctime()}")
-    print(f"Anamoly: {anomaly} logged at {time.ctime()}")
+    syslog.syslog(syslog.LOG_WARNING, f"Anomaly detected: {anomaly}, Time: {time.ctime()}, Status: {ANOMALY_STATUS}")
+    print(f"Anomaly: {anomaly} logged at {time.ctime()} as {ANOMALY_STATUS}")
     
-    send_alert(anomaly)
+    
+    # Notify user
+    send_alert(anomaly, ANOMALY_STATUS)
     
     return True
 
 def process_packet(packet):
-    global ANOMALY_TYPE, ANOMALY_DETECTED
+    global ANOMALY_TYPE, ANOMALY_DETECTED, ANOMALY_STATUS
 
     if not is_packet_allowed(packet, WHITELIST):
-        if log_anomaly(ANOMALY_TYPE):
-            print("Anomaly found and protocolled... Monitoring continued.")
+        if log_anomaly(ANOMALY_TYPE, ANOMALY_STATUS):
+            print("Anomaly found & protocolled. Monitoring continued.")
         
     ANOMALY_TYPE = ""
     ANOMALY_DETECTED = False
+    ANOMALY_STATUS = "NEW"
+    
+def unsorted_file(src_ip, src_port, dst_ip, dst_port):
+    pattern = f"{src_ip} : {src_port} --> {dst_ip} : {dst_port}"
+    reverse_pattern = f"{dst_ip} : {dst_port} --> {src_ip} : {src_port}" 
+
+    if not os.path.exists(UNSORTED_FILE):
+        with open(UNSORTED_FILE, "w") as file:
+            print(f"Created {UNSORTED_FILE}.")
+            
+    with open(UNSORTED_FILE, "r") as file:
+        existing_unsorted = file.read()
+        
+        
+    if pattern in existing_unsorted or reverse_pattern in existing_unsorted:
+        return
+    
+    with open(UNSORTED_FILE, "a") as file:
+        file.write(pattern + "\n")
 
 def main():
     global WHITELIST
     
     syslog.openlog(ident="IDS_Mailer", logoption=syslog.LOG_PID)
-    # syslog.syslog(syslog.LOG_INFO, "Starting IDS with mail-related logging.")
+    syslog.syslog(syslog.LOG_INFO, "Starting IDS with mail-related logging.")
 
     WHITELIST = load_whitelist()
-    whitelist_length = len(WHITELIST)
-    print(whitelist_length)
-    # syslog.syslog(syslog.LOG_INFO, f"Whitelist loaded from {WHITELIST_FILE}.")
+    syslog.syslog(syslog.LOG_INFO, f"Whitelist loaded from {WHITELIST_FILE}.")
+    # Length of Whitelist after Port-Normalisation
+    l = len(WHITELIST)
+    print(f"Length of whitelist after port normalisation: {l}")
 
     interface = os.getenv('INTERFACE')
 
     print(f"Monitoring packets through interface {interface}...")
-    # syslog.syslog(syslog.LOG_INFO, f"Monitoring packets on interface {interface}.")
+    syslog.syslog(syslog.LOG_INFO, f"Monitoring packets on interface {interface}.")
 
     try:
         sniff(iface=interface, filter="ip", prn=process_packet, store=0)
         
     except PermissionError:
-        # syslog.syslog(syslog.LOG_ERR, "Permission denied. Please run with elevated privileges.")
+        syslog.syslog(syslog.LOG_ERR, "Permission denied. Please run with elevated privileges.")
         print("Permission denied. Please run with elevated privileges.")
         exit(1)
 
     except Exception as e:
-        # syslog.syslog(syslog.LOG_ERR, f"Unexpected error: {e}")
+        syslog.syslog(syslog.LOG_ERR, f"Unexpected error: {e}")
         print(f"Unexpected error: {e}")
         
     finally:
