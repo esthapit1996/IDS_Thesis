@@ -38,8 +38,8 @@ change from sudo python3 script.py to sudo ./script.py - Done
 
 inform user if old or new anamoly - Done
 
-add_to_whitelist()
-add_to_blacklist()
+add_to_whitelist() done
+add_to_blacklist() done
 
 
 Results:
@@ -47,11 +47,10 @@ new whitelist as compressed whitelist for results
 how many diffrent Anaomalies I get from this whitelist in a day
 
 Anwendungsfaelle:
-1. Whitelist erstellen
+1. Pcap und Whitelist erstellen
 2. Anamolie detektieren
-3. Whitelist aktualisieren
-4. Blacklist erstellen
-5. Benutzer benachrichtigen
+3. Whitelist und Blacklist aktualisieren
+4. Benutzer benachrichtigen
 
 except handling nur als comment schreiben und nicht detaliert erklaren
 Uebersichtstablle fur die erfullte Anforderungen machen

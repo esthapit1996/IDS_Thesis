@@ -63,14 +63,68 @@ def create_whitelist(pcap_file, output_file):
         print(f"Error: {e}")
     except Exception as e:
         print(f"An unexpected error occured while processing the PCAP file: {e}")
-        
+
+
+def add_to_whitelist(line, whitelist_file, existing_entries_whitelist):
+    """Adds bidirectional entries to the whitelist."""
+    parts = line.split(' --> ')
+    if len(parts) != 2:
+        print(f"Invalid line format: {line}")
+        return 0  # No entries added
+
+    forward_entry = line
+    reverse_entry = f"{parts[1]} --> {parts[0]}"
+    new_entries = 0
+
+    with open(whitelist_file, 'a') as whitelist:
+        if forward_entry not in existing_entries_whitelist:
+            whitelist.write(forward_entry + "\n")
+            existing_entries_whitelist.add(forward_entry)
+            new_entries += 1
+
+        if reverse_entry not in existing_entries_whitelist:
+            whitelist.write(reverse_entry + "\n")
+            existing_entries_whitelist.add(reverse_entry)
+            new_entries += 1
+
+    os.chmod(whitelist_file, 0o600)
+    print(f"\nAdded bidirectional entries to WHITELIST for: {line}\n")
+    return new_entries
+
+
+def add_to_blacklist(line, blacklist_file, existing_entries_blacklist):
+    """Adds bidirectional entries to the blacklist."""
+    parts = line.split(' --> ')
+    if len(parts) != 2:
+        print(f"Invalid line format: {line}")
+        return 0  # No entries added
+
+    forward_entry = line
+    reverse_entry = f"{parts[1]} --> {parts[0]}"
+    new_entries = 0
+
+    with open(blacklist_file, 'a') as blacklist:
+        if forward_entry not in existing_entries_blacklist:
+            blacklist.write(forward_entry + "\n")
+            existing_entries_blacklist.add(forward_entry)
+            new_entries += 1
+
+        if reverse_entry not in existing_entries_blacklist:
+            blacklist.write(reverse_entry + "\n")
+            existing_entries_blacklist.add(reverse_entry)
+            new_entries += 1
+
+    os.chmod(blacklist_file, 0o640)
+    print(f"\nAdded bidirectional entries to BLACKLIST for: {line}\n")
+    return new_entries
+
 
 def update_from_unsorted(unsorted_file):
     global WHITELIST, BLACKLIST, OUTPUT_FOLDER
-    
+
     whitelist_file = os.path.join(OUTPUT_FOLDER, WHITELIST)
     blacklist_file = os.path.join(OUTPUT_FOLDER, BLACKLIST)
-    
+
     try:
         if not os.path.exists(unsorted_file):
             print(f"Unsorted file {unsorted_file} not found.")
@@ -78,111 +132,60 @@ def update_from_unsorted(unsorted_file):
 
         with open(unsorted_file, 'r') as unsorted:
             lines_us = unsorted.readlines()
-            
+
         lines_count = len(lines_us)
         print(f"Total lines in unsorted file: {lines_count}")
-        
+
         existing_entries_whitelist = set()
         existing_entries_blacklist = set()
         remaining_lines = []
         new_entries_added_whitelist = 0
         new_entries_added_blacklist = 0
-        
+
         if os.path.exists(whitelist_file):
             with open(whitelist_file, 'r') as whitelist:
                 existing_entries_whitelist = set(line.strip() for line in whitelist)
-                # print("#########EXISTING_WHITELIST#######")
-                # print(existing_entries_whitelist)
-                # print("###################################################")
-                
+
         if os.path.exists(blacklist_file):
             with open(blacklist_file, 'r') as blacklist:
                 existing_entries_blacklist = set(line.strip() for line in blacklist)
-                # print("#########EXISTING_BLACKLIST#######")
-                # print(existing_entries_blacklist)
-                # print("###################################################")
-                
+
         for line in lines_us:
             line = line.strip()
-            # check for enpty or existing line
-            if (not line or line in existing_entries_whitelist) or (not line or line in existing_entries_blacklist):
+            if not line or line in existing_entries_whitelist or line in existing_entries_blacklist:
                 continue
-            
-            print(f"Entry: {line}")
-            choice = input("Add to Whitelist/Blacklist? ('w' to whitelist, 'b' to blacklist,  's' to skip): ".strip().lower())
-            parts = line.split(' --> ')
-            
-            if choice == 'w':
-                if len(parts) != 2:
-                    print(f"Invalid line format: {line}")
-                    continue
-                
-                forward_entry = line
-                reverse_entry = f"{parts[1]} --> {parts[0]}"
-                                                 
-                with open(whitelist_file, 'a') as whitelist:
-                    if forward_entry not in existing_entries_whitelist:
-                        whitelist.write(forward_entry + "\n")
-                        existing_entries_whitelist.add(forward_entry)
-                        new_entries_added_whitelist += 1
-                    if reverse_entry not in existing_entries_whitelist:
-                        whitelist.write(reverse_entry + "\n")
-                        existing_entries_whitelist.add(reverse_entry)
-                        new_entries_added_whitelist += 1
-                        
-                print(f"\nAdded bidirectional entries to WHITELIST for: {line}\n")
-                os.chmod(whitelist_file, 0o600)
-                
-            elif choice == 'b':
-                if len(parts) != 2:
-                    print(f"Invalid line format: {line}")
-                    continue
-                
-                forward_entry = line
-                reverse_entry = f"{parts[1]} --> {parts[0]}"
-                                                 
-                with open(blacklist_file, 'a') as blacklist:
-                    if forward_entry not in existing_entries_blacklist:
-                        blacklist.write(forward_entry + "\n")
-                        existing_entries_blacklist.add(forward_entry)
-                        new_entries_added_blacklist += 1
 
-                    if reverse_entry not in existing_entries_whitelist:
-                        blacklist.write(reverse_entry + "\n")
-                        existing_entries_blacklist.add(reverse_entry)
-                        new_entries_added_blacklist += 1
-                        
-                print(f"\nAdded bidirectional entries to BLACKLIST for: {line}\n")
-                os.chmod(blacklist_file, 0o640)
-            
+            print(f"Entry: {line}")
+            choice = input("Add to Whitelist/Blacklist? ('w' to whitelist, 'b' to blacklist,  's' to skip): ").strip().lower()
+
+            if choice == 'w':
+                new_entries_added_whitelist += add_to_whitelist(line, whitelist_file, existing_entries_whitelist)
+            elif choice == 'b':
+                new_entries_added_blacklist += add_to_blacklist(line, blacklist_file, existing_entries_blacklist)
             elif choice == 's':
                 print(f"\nSkipped: {line}\n")
                 remaining_lines.append(line)
-            
             else:
                 print("\nInvalid Input. Skipping by default.\n")
                 remaining_lines.append(line)
-                
+
         with open(unsorted_file, 'w') as unsorted:
             unsorted.write("\n".join(remaining_lines) + "\n")
-            
+
         remaining_count = len(remaining_lines)
         print(f"\nUnsorted file updated with remaining entries. Remaining number of lines to be sorted: {remaining_count}")
-        
+
         if new_entries_added_blacklist > 0 and new_entries_added_whitelist > 0:
-            print(f"New {new_entries_added_whitelist} line(s) in WHITELIST and new {new_entries_added_blacklist} line(s)BLACKLIST detected. Please restart your Trigger.")
-  
+            print(f"New {new_entries_added_whitelist} line(s) in WHITELIST and new {new_entries_added_blacklist} line(s) in BLACKLIST detected. Please restart your Trigger.")
         elif new_entries_added_whitelist > 0:
             print(f"New {new_entries_added_whitelist} line(s) in WHITELIST detected. Please restart your Trigger.")
-            
         elif new_entries_added_blacklist > 0:
             print(f"New {new_entries_added_blacklist} line(s) in BLACKLIST detected. Please restart your Trigger.")
-        
         else:
-            print("No new lines added to the whitelist.")
-                
+            print("No new lines added to the whitelist or blacklist.")
+
     except Exception as e:
-        print(f"An unexpected error occured: {e}")
+        print(f"An error occurred: {e}")
 
 
 if __name__ == "__main__":
