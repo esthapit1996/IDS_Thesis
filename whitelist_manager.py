@@ -3,7 +3,7 @@
 import os
 import time
 import argparse
-import subprocess
+import syslog
 from scapy.all import rdpcap
 from dotenv import load_dotenv
 
@@ -23,9 +23,10 @@ def create_whitelist(pcap_file, output_file):
                 existing_entries_whitelist = set(line.strip() for line in whitelist)
         
         # Parse PCAP file
+        start_time = time.time()
         packets = rdpcap(pcap_file)
         new_entries = set()
-        whitelist_file
+        
         for pkt in packets:
             if 'IP' in pkt:
                 dest_ip = pkt['IP'].dst
@@ -36,7 +37,7 @@ def create_whitelist(pcap_file, output_file):
                     destination_port = pkt.dport
                     source_port = pkt.sport
                 else:
-                    print("Packet ist weder TCP noch UDP")
+                    print("Packet is neither TCP nor UDP")
                     continue
                     
                 entry = f"{dest_ip} : {destination_port} --> {source_ip} : {source_port}"
@@ -47,7 +48,7 @@ def create_whitelist(pcap_file, output_file):
                 
         unique_new_entries = new_entries - existing_entries_whitelist
                 
-        os.makedirs(os.path.dirname(whitelist_file), exist_ok=True)
+        os.makedirs(os.path.dirname(output_file), exist_ok=True)
         
         if unique_new_entries:
             with open(output_file, 'a') as whitelist:
@@ -59,6 +60,22 @@ def create_whitelist(pcap_file, output_file):
         os.chmod(output_file, 0o600)
         print(f"Permissions for {output_file} changed to 600")
         
+        end_time = time.time()
+        total_time = end_time - start_time 
+        print(f"Program completed in {total_time:.2f} seconds.")
+        
+        while True:
+            delete_choice = input(f"Do you want to delete {pcap_file}? (y/n): ").strip().lower()
+            if delete_choice == 'y':
+                os.remove(pcap_file)
+                print(f"PCAP file {pcap_file} has been deleted.")
+                break
+            elif delete_choice == 'n':
+                print(f"PCAP file {pcap_file} has not been deleted.")
+                break
+            else:
+                print("Invalid input. Please enter 'y' or 'n'.")
+                
     except FileNotFoundError as e:
         print(f"Error: {e}")
     except Exception as e:
@@ -66,11 +83,10 @@ def create_whitelist(pcap_file, output_file):
 
 
 def add_to_whitelist(line, whitelist_file, existing_entries_whitelist):
-    """Adds bidirectional entries to the whitelist."""
     parts = line.split(' --> ')
     if len(parts) != 2:
         print(f"Invalid line format: {line}")
-        return 0  # No entries added
+        return 0
 
     forward_entry = line
     reverse_entry = f"{parts[1]} --> {parts[0]}"
@@ -80,11 +96,13 @@ def add_to_whitelist(line, whitelist_file, existing_entries_whitelist):
         if forward_entry not in existing_entries_whitelist:
             whitelist.write(forward_entry + "\n")
             existing_entries_whitelist.add(forward_entry)
+            syslog.syslog(syslog.LOG_INFO, f"[Whitelist] Added entry: {forward_entry}, Time: {time.ctime()}")
             new_entries += 1
 
         if reverse_entry not in existing_entries_whitelist:
             whitelist.write(reverse_entry + "\n")
             existing_entries_whitelist.add(reverse_entry)
+            syslog.syslog(syslog.LOG_INFO, f"[Whitelist] Added entry: {reverse_entry}, Time: {time.ctime()}")
             new_entries += 1
 
     os.chmod(whitelist_file, 0o600)
@@ -93,11 +111,10 @@ def add_to_whitelist(line, whitelist_file, existing_entries_whitelist):
 
 
 def add_to_blacklist(line, blacklist_file, existing_entries_blacklist):
-    """Adds bidirectional entries to the blacklist."""
     parts = line.split(' --> ')
     if len(parts) != 2:
         print(f"Invalid line format: {line}")
-        return 0  # No entries added
+        return 0
 
     forward_entry = line
     reverse_entry = f"{parts[1]} --> {parts[0]}"
@@ -107,11 +124,13 @@ def add_to_blacklist(line, blacklist_file, existing_entries_blacklist):
         if forward_entry not in existing_entries_blacklist:
             blacklist.write(forward_entry + "\n")
             existing_entries_blacklist.add(forward_entry)
+            syslog.syslog(syslog.LOG_INFO, f"[Blacklist] Added entry: {forward_entry}, Time: {time.ctime()}")
             new_entries += 1
 
         if reverse_entry not in existing_entries_blacklist:
             blacklist.write(reverse_entry + "\n")
             existing_entries_blacklist.add(reverse_entry)
+            syslog.syslog(syslog.LOG_INFO, f"[Blacklist] Added entry: {reverse_entry}, Time: {time.ctime()}")
             new_entries += 1
 
     os.chmod(blacklist_file, 0o640)
@@ -149,14 +168,23 @@ def update_from_unsorted(unsorted_file):
         if os.path.exists(blacklist_file):
             with open(blacklist_file, 'r') as blacklist:
                 existing_entries_blacklist = set(line.strip() for line in blacklist)
+                
+        skip_all = False
 
         for line in lines_us:
             line = line.strip()
             if not line or line in existing_entries_whitelist or line in existing_entries_blacklist:
                 continue
+            
+            if skip_all:
+                remaining_lines.append(line)
+                continue
 
-            print(f"Entry: {line}")
-            choice = input("Add to Whitelist/Blacklist? ('w' to whitelist, 'b' to blacklist,  's' to skip): ").strip().lower()
+            while True:
+                choice = input("Add to Whitelist/Blacklist? ('w' to whitelist, 'b' to blacklist,  's' to skip, 'sa' to skip all): ").strip().lower()
+                if choice in ['w', 'b', 's', 'sa']:
+                    break
+                print("\nInvalid Input. Please enter 'w' to whitelist, 'b' to blacklist,  's' to skip, 'sa' to skip all).\n")
 
             if choice == 'w':
                 new_entries_added_whitelist += add_to_whitelist(line, whitelist_file, existing_entries_whitelist)
@@ -165,8 +193,9 @@ def update_from_unsorted(unsorted_file):
             elif choice == 's':
                 print(f"\nSkipped: {line}\n")
                 remaining_lines.append(line)
-            else:
-                print("\nInvalid Input. Skipping by default.\n")
+            elif choice == 'sa':
+                print("\n Skipping all remaining entires.")
+                skip_all = True
                 remaining_lines.append(line)
 
         with open(unsorted_file, 'w') as unsorted:
@@ -189,23 +218,27 @@ def update_from_unsorted(unsorted_file):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Manage the whitelist from PCAP or unsorted files.")
-    parser.add_argument("mode", type=int, choices=[1, 2], help="1 -> To create/Update Whitelist from PCAP, 2 -> To Sorting the Unsorted-list.")
-    args = parser.parse_args()
-
-    if args.mode == 1:
-        start_time = time.time()
     
-        whitelist_file = os.path.join(OUTPUT_FOLDER, os.getenv('WHITELIST'))
-        create_whitelist(PCAP_FILE, whitelist_file)
+    syslog.openlog(ident="IDS_Mailer", logoption=syslog.LOG_PID)
     
-        d = time.time() - time.time()
-        print (f"d is {d * 1000:.8f} ms.")
-        total_time = time.time() - start_time - d
+    try:
+        parser = argparse.ArgumentParser(description="Manage the whitelist from PCAP or unsorted files.")
+        parser.add_argument("mode", type=int, choices=[1, 2], help="1 -> To start Creation Mode || 2 -> To start Sorting Mode.")
+        args = parser.parse_args()  
 
-        print(f"Program completed in {total_time:.2f} seconds.")
+        if args.mode == 1:
+            print("Starting Creation Mode")
+            whitelist_file = os.path.join(OUTPUT_FOLDER, os.getenv('WHITELIST'))
+            create_whitelist(PCAP_FILE, whitelist_file)
 
-    elif args.mode == 2:
-        update_from_unsorted(UNSORTED_FILE)
-
+        elif args.mode == 2:
+            print("Starting Sorting Mode")
+            update_from_unsorted(UNSORTED_FILE)
+            
+    except Exception as e:
+        syslog.syslog(syslog.LOG_ERR, f"[Trigger] Unexpected error: {e}")
+        print(f"Unexpected error: {e}")
+    
+    finally:
+        syslog.closelog()
     

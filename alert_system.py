@@ -5,7 +5,7 @@ import os
 
 load_dotenv()
 
-SUBJECT = "NETWORK ANAMOLY DETECTED"
+SUBJECT = "NETWORK ANOMALY DETECTED"
 RECIPIENT = os.getenv('RECIPIENT')
 
 def send_alert(anomaly_type, anomaly_status):

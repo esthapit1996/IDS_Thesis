@@ -3,7 +3,25 @@ Started: 27.12.24
 ended: 1.1.25
 pcapsize= 240MB
 
+exp1: 809M Jan 23 00:52 captured_packets.pcap
+
 whitelist.txt:
 elapsed_time(seconds): 197.29, 219.09
-Number of lines: 29252, 29252
+Number of lines: 29298, 29298
+38599 new entries + 92 line(s) from unsorted
+exp1: 67899 in 390secs
+
+
+
+
+
+How long did I run my packet_handler and what was the size of the pcap data? Done
+How long is the Whitelist generated from this pcap data and how long does it take to compile? 
+How does the Whitelist look like after being filtering the Pcap? done
+How long is the list after normalising the ports and how does it look like? done
+How many new Anomalies were detected after running for 1/2 day (12 hrs)?
+How does the logs look like with syslog?
+How does the message with a new Anamoly and an old Anamoly look like?
+How does my unsorted file look like? 
+
 

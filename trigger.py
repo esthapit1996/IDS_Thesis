@@ -5,9 +5,9 @@ import re
 import os
 import time
 import syslog
-import subprocess
 from alert_system import send_alert
 from dotenv import load_dotenv
+from packet_handler import set_promiscuous_mode
 
 load_dotenv()
 
@@ -16,7 +16,7 @@ ANOMALY_DETECTED = False
 ANOMALY_LOG = {}
 ANOMALY_STATUS = "NEW"
 
-NOTIFICATION_TIMEOUT = 5 #in seconds
+NOTIFICATION_TIMEOUT = 600 #in seconds
 
 OUTPUT_FOLDER = os.getenv('OUTPUT_FOLDER')
 WHITELIST_FILE = os.path.join(OUTPUT_FOLDER, os.getenv('WHITELIST'))
@@ -43,11 +43,13 @@ def load_whitelist():
                     whitelist.add((src, src_port, dst, dst_port))
 
     except FileNotFoundError:
-        syslog.syslog(syslog.LOG_ERR, f"Error: Whitelist file not found at {WHITELIST_FILE}.")
+        print(f"Error: Whitelist file not found at {WHITELIST_FILE}")
+        syslog.syslog(syslog.LOG_ERR, f"[Trigger] Error: Whitelist file not found at {WHITELIST_FILE}.")
         exit(1)
 
     except Exception as e:
-        syslog.syslog(syslog.LOG_ERR, f"Error while reading whitelist file: {e}")
+        print(f"Error while reading whitelist file: {e}")
+        syslog.syslog(syslog.LOG_ERR, f"[Trigger] Error while reading whitelist file: {e}")
         exit(1)
 
     return whitelist
@@ -114,9 +116,8 @@ def log_anomaly(anomaly, anomaly_status):
         ANOMALY_STATUS = "NEW"
     ANOMALY_LOG[anomaly] = current_time
     
-    syslog.syslog(syslog.LOG_WARNING, f"Anomaly detected: {anomaly}, Time: {time.ctime()}, Status: {ANOMALY_STATUS}")
+    syslog.syslog(syslog.LOG_WARNING, f"[Trigger] Anomaly detected: {anomaly}, Time: {time.ctime()}, Status: {ANOMALY_STATUS}")
     print(f"Anomaly: {anomaly} logged at {time.ctime()} as {ANOMALY_STATUS}")
-    
     
     # Notify user
     send_alert(anomaly, ANOMALY_STATUS)
@@ -145,44 +146,36 @@ def unsorted_file(src_ip, src_port, dst_ip, dst_port):
     with open(UNSORTED_FILE, "r") as file:
         existing_unsorted = file.read()
         
-        
     if pattern in existing_unsorted or reverse_pattern in existing_unsorted:
         return
     
     with open(UNSORTED_FILE, "a") as file:
         file.write(pattern + "\n")
 
-def main():
+if __name__ == "__main__":
     global WHITELIST
     
+    interface = os.getenv('INTERFACE')
+    set_promiscuous_mode(interface, enable=True)
+    
     syslog.openlog(ident="IDS_Mailer", logoption=syslog.LOG_PID)
-    syslog.syslog(syslog.LOG_INFO, "Starting IDS with mail-related logging.")
+    syslog.syslog(syslog.LOG_INFO, "[Trigger] Starting IDS with mail-related logging.")
 
     WHITELIST = load_whitelist()
-    syslog.syslog(syslog.LOG_INFO, f"Whitelist loaded from {WHITELIST_FILE}.")
-    # Length of Whitelist after Port-Normalisation
+    syslog.syslog(syslog.LOG_INFO, f"[Trigger] Whitelist loaded from {WHITELIST_FILE}.")
+
     l = len(WHITELIST)
     print(f"Length of whitelist after port normalisation: {l}")
 
-    interface = os.getenv('INTERFACE')
-
     print(f"Monitoring packets through interface {interface}...")
-    syslog.syslog(syslog.LOG_INFO, f"Monitoring packets on interface {interface}.")
+    syslog.syslog(syslog.LOG_INFO, f"[Trigger] Monitoring packets on interface {interface}.")
 
     try:
         sniff(iface=interface, filter="ip", prn=process_packet, store=0)
         
-    except PermissionError:
-        syslog.syslog(syslog.LOG_ERR, "Permission denied. Please run with elevated privileges.")
-        print("Permission denied. Please run with elevated privileges.")
-        exit(1)
-
     except Exception as e:
-        syslog.syslog(syslog.LOG_ERR, f"Unexpected error: {e}")
+        syslog.syslog(syslog.LOG_ERR, f"[Trigger] Unexpected error: {e}")
         print(f"Unexpected error: {e}")
         
     finally:
         syslog.closelog()
-
-if __name__ == "__main__":
-    main()

@@ -1,56 +1,90 @@
 Whitelist:
-216.58.206.42 : https --> 192.168.50.31 : > 1024 -done
-*:https ist erlaubt & rueckrichtung -done
-WENN DEST PORT < 1024 ist, gibt es eine warnung -done
+216.58.206.42 : https --> 192.168.50.31 : > 1024 -DONE
+*:https ist erlaubt & rueckrichtung -DONE
+WENN DEST PORT < 1024 ist, gibt es eine warnung -DONE
 
-Bereiche von Ports und IP Addresses(Netmask) -done
+Bereiche von Ports und IP Addresses(Netmask) -DONE
 
-
-alles grosser als 1024 als 1024 setzen - done
+alles grosser als 1024 als 1024 setzen - DONE
 
 syslog deamon schicken: https://docs.python.org/3/library/syslog.html
-facility=syslog.LOG_MAIL brauche ich nicht.
+facility=syslog.LOG_MAIL brauche ich nicht.  
 
-python liste anlegen, die Warnung prueft mit Timeout(10 min)
+python liste anlegen, die Warnung prueft mit Timeout(10 min) DONE
 
 Kozept und implementation anfangen
 
 chmod 600 whitelist.txt ? DONE
-pcap loeschen nach whitelist erstellung ? MAkefile?
+pcap loeschen nach whitelist erstellung ? DONE
 
 Dynamic ports 1024 oder 1025? 1024 laut https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml
 
 Bei Erginisse:
-laenge der Whitelist aus pcap?
+laenge der Whitelist aus pcap? DONE
 
 The whitelist adds a "unique entry" from the pcap data atm and does not check the existing entries in the whitelist.
 This means if i run the whitelist script again, the same entry will be written again, regardless of it existing
 inside my whitelist.txt or not... SOLVED!
 
 
-
-change permission line to 600 instead of Stat - Done
+change permission line to 600 instead of Stat - DONE
 
 d = time.time() - time.time(), wie lange dauert function time zu rufen
-total_time = end - start -d -Done
+total_time = end - start -d -DONE
 
-change from sudo python3 script.py to sudo ./script.py - Done
+change from sudo python3 script.py to sudo ./script.py - DONE
 
-inform user if old or new anamoly - Done
+inform user if old or new anamoly - DONE
 
-add_to_whitelist() done
-add_to_blacklist() done
-
-
-Results:
-new whitelist as compressed whitelist for results
-how many diffrent Anaomalies I get from this whitelist in a day
+add_to_whitelist() DONE
+add_to_blacklist() DONE
 
 Anwendungsfaelle:
-1. Pcap und Whitelist erstellen
-2. Anamolie detektieren
-3. Whitelist und Blacklist aktualisieren
-4. Benutzer benachrichtigen
+1. Pcap und Whitelist erstellen DONE
+2. Anamolie detektieren und Benutzer benachrichtigen DONE
+3. Whitelist und Blacklist aktualisieren DONE
 
-except handling nur als comment schreiben und nicht detaliert erklaren
-Uebersichtstablle fur die erfullte Anforderungen machen
+Anwendungsfalldiagram DONE
+
+Konzept aktualisieren(Anforderungsanalyse und Erlauterung der Komponenten) DONE
+
+Klassendiagram aktualisieren Done
+
+Realisierung aktualisieren Done
+Nur notwendige code benutzen (muss nicht gleich wie original sein) Done
+'except handling' nur als comment schreiben und nicht detaliert erklaren Done
+Uebersichtstablle fur die erfullte Anforderungen machen. Anforderungs ID, Beschreibung, COde Referenz, Status, Bemerkungen Done
+Code Referenz: Name des Scripts, Klasse xyz, Funktion xyz, Methode xyz Done
+
+Ausfuehrung im Terminal ueberlegen Done
+
+Results anfangen:
+new whitelist as compressed whitelist for results - Done
+how many diffrent Anaomalies and protocolsI get from this whitelist in a day - Done
+
+'Level' auf deustch? -> Level Done
+
+Promiscuous Modus automieren Done
+Fehlermeldungen weg in Usecase Done
+Technische Kommentare weglassen Usecase Done
+Klassendiagram: Nur wichtigen info und schreiben dass wer alles gucken will, soll quellcode schauen Done
+skip all - DOne
+
+2.2.2 IP-> mit Netmaske, Unicast, Broadcast, Multicast DONE
+anstatt Wireshark -> PCAP und kurz ueber wireshark DONE
+Ports in TCP UDP erklaeren
+IDS
+
+
+
+Systemeinrichtungen auf Experiment schieben
+Ergebnisse: Environment wo ich gemessen habe (Auf Router mit LAN Verbindungen), mit Grafik darstelln?
+Experiment Aufbau
+Wird meine Anomalie weniger mit hinzufuegen in whitelist, noch mal experimentieren
+
+Einleitung und Abkuerzungsverzeichnis/Zitaten bearbeiten
+
+Tests? - unittest: Tests erstellen und einfach erwaehnen, 2 Seiten reicht
+
+
+Soeren und forler in cc nehmen und Dekanateschreib, um Bitte um Bestaetigung meiner Abgabe
