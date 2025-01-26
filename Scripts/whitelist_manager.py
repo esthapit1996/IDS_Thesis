@@ -181,6 +181,7 @@ def update_from_unsorted(unsorted_file):
                 continue
 
             while True:
+                print(line)
                 choice = input("Add to Whitelist/Blacklist? ('w' to whitelist, 'b' to blacklist,  's' to skip, 'sa' to skip all): ").strip().lower()
                 if choice in ['w', 'b', 's', 'sa']:
                     break

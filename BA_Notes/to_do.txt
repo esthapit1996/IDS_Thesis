@@ -72,19 +72,28 @@ skip all - DOne
 
 2.2.2 IP-> mit Netmaske, Unicast, Broadcast, Multicast DONE
 anstatt Wireshark -> PCAP und kurz ueber wireshark DONE
-Ports in TCP UDP erklaeren
-IDS
+Ports in TCP UDP erklaeren DOne
+IDS Done
 
 
 
 Systemeinrichtungen auf Experiment schieben
 Ergebnisse: Environment wo ich gemessen habe (Auf Router mit LAN Verbindungen), mit Grafik darstelln?
-Experiment Aufbau
-Wird meine Anomalie weniger mit hinzufuegen in whitelist, noch mal experimentieren
+Experiment Aufbau Done
+Wird meine Anomalie weniger mit hinzufuegen in whitelist, noch mal experimentieren Done
 
-Einleitung und Abkuerzungsverzeichnis/Zitaten bearbeiten
+Einleitung und Abkuerzungsverzeichnis/Zitaten bearbeiten Done
+
+SCAPY
+Listing update
+dritte Experiment
 
 Tests? - unittest: Tests erstellen und einfach erwaehnen, 2 Seiten reicht
+Grunf fuer mehrere Anomalie
 
 
 Soeren und forler in cc nehmen und Dekanateschreib, um Bitte um Bestaetigung meiner Abgabe
+
+Forlet und Soeren in cc nehmen und DEkanaten diese sachen schicken:
+"Anhang: Abschulssarbeit" und zip code von quellcode
+Github Repo

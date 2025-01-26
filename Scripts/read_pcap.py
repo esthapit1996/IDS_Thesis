@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from scapy.all import *
 
 # Read packet from a PCAP file

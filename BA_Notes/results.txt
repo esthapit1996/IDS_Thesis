@@ -1,19 +1,19 @@
 packet_handler.py:
 Started: 27.12.24
 ended: 1.1.25
-pcapsize= 240MB
+pcapsize= 240MB 
 
-exp1: 809M Jan 23 00:52 captured_packets.pcap
+exp1: 949M Jan 23 14:00 captured_packets.pcap
 
 whitelist.txt:
 elapsed_time(seconds): 197.29, 219.09
 Number of lines: 29298, 29298
-38599 new entries + 92 line(s) from unsorted
-exp1: 67899 in 390secs
+
+exp1: 77203 in 390secs
+3176 after port-normalising
 
 
-
-
+trigger startted 14:00
 
 How long did I run my packet_handler and what was the size of the pcap data? Done
 How long is the Whitelist generated from this pcap data and how long does it take to compile? 
