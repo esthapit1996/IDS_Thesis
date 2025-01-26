@@ -21,39 +21,36 @@ class TestWhitelistManager(unittest.TestCase):
         mock_open.assert_any_call('test.pcap', 'rb')
         mock_open.assert_any_call('output/whitelist.txt', 'r')
 
-
     # Test for Whitelist
     @patch.dict(os.environ, {'OUTPUT_FOLDER': 'output', 'WHITELIST': 'whitelist.txt'})
-    @patch('os.path.exists', return_value=True)  # Mock file existence
-    @patch('builtins.open', new_callable=mock_open, read_data="192.168.1.1 : 80 --> 192.168.1.2 : 443\n")  # Simulate existing entries in the whitelist
+    @patch('os.path.exists', return_value=True)
+    @patch('builtins.open', new_callable=mock_open, read_data="192.168.1.1 : 80 --> 192.168.1.2 : 443\n")
     @patch('os.chmod')
     def test_add_to_whitelist(self, mock_open, mock_exists, mock_chmod):
         result = add_to_whitelist("192.168.1.1 : 80 --> 192.168.1.2 : 443", 'output/whitelist.txt', {"192.168.1.1 : 80 --> 192.168.1.2 : 443"})
         
         # Ensure file has 600 permission
         mock_open.assert_called_with('output/whitelist.txt', 0o600)
-        
         # Ensure entry was added
         self.assertEqual(result, 1)
         
     # Test for Blacklist
     @patch.dict(os.environ, {'OUTPUT_FOLDER': 'output', 'BLACKLIST': 'blacklist.txt'})
-    @patch('os.path.exists', return_value=True)  # Mock file existence
-    @patch('builtins.open', new_callable=mock_open, read_data="192.168.1.1 : 80 --> 192.168.1.2 : 443\n")  # Simulate existing entries in the whitelist
+    @patch('os.path.exists', return_value=True)
+    @patch('builtins.open', new_callable=mock_open, read_data="192.168.1.1 : 80 --> 192.168.1.2 : 443\n")
     @patch('os.chmod')
     def test_add_to_whitelist(self, mock_open, mock_exists, mock_chmod):
         result = add_to_whitelist("192.168.1.1 : 80 --> 192.168.1.2 : 443", 'output/blacklist.txt', {"192.168.1.1 : 80 --> 192.168.1.2 : 443"})
         
         # Ensure file has 600 permission
         mock_open.assert_called_with('output/blacklist.txt', 0o600)
-        
         # Ensure entry was added
         self.assertEqual(result, 1)
         
-        
+    # Test for unsorted   
     @patch.dict(os.environ, {'OUTPUT_FOLDER': 'output', 'UNSORTED_FILE': 'unsorted.txt', 'BLACKLIST': 'blacklist.txt', 'WHITELIST': 'whitelist.txt'})
-    @patch('os.path.exists', return_value=True)  # Mock file existence
-    @patch('builtins.open', new_callable=mock_open, read_data="192.168.1.1 : 80 --> 192.168.1.2 : 443\n")  # Simulate unsorted file content
+    @patch('os.path.exists', return_value=True)
+    @patch('builtins.open', new_callable=mock_open, read_data="192.168.1.1 : 80 --> 192.168.1.2 : 443\n")
     @patch('syslog.syslog')  # Mock syslog logging
     def test_update_from_unsorted(self, mock_syslog, mock_open, mock_exists):
         with patch('builtins.input', return_value='w'):
