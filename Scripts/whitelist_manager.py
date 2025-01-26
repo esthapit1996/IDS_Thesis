@@ -133,7 +133,7 @@ def add_to_blacklist(line, blacklist_file, existing_entries_blacklist):
             syslog.syslog(syslog.LOG_INFO, f"[Blacklist] Added entry: {reverse_entry}, Time: {time.ctime()}")
             new_entries += 1
 
-    os.chmod(blacklist_file, 0o640)
+    os.chmod(blacklist_file, 0o600)
     print(f"\nAdded bidirectional entries to BLACKLIST for: {line}\n")
     return new_entries
 

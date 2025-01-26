@@ -16,7 +16,6 @@ class TestWhitelistManager(unittest.TestCase):
     @patch('builtins.open', new_callable=mock_open, read_data="")
     def test_create_whitelist(self, mock_open, mock_exists):
         create_whitelist('test.pcap', 'output/whitelist.txt')
-        
         # Read PCAP and Whitelist
         mock_open.assert_any_call('test.pcap', 'rb')
         mock_open.assert_any_call('output/whitelist.txt', 'r')
@@ -24,7 +23,9 @@ class TestWhitelistManager(unittest.TestCase):
     # Test for Whitelist
     @patch.dict(os.environ, {'OUTPUT_FOLDER': 'output', 'WHITELIST': 'whitelist.txt'})
     @patch('builtins.open', new_callable=mock_open, read_data="192.168.1.1 : 80 --> 192.168.1.2 : 443\n")
-    def test_add_to_whitelist(self, mock_open):
+    @patch('os.chmod')
+    def test_add_to_whitelist(self, mock_open, mock_chmod):
+        
         result = add_to_whitelist("192.168.1.1 : 80 --> 192.168.1.2 : 443", 'output/whitelist.txt', {"192.168.1.1 : 80 --> 192.168.1.2 : 443"})
         
         # Ensure file has 600 permission
