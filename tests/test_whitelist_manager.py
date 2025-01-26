@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import unittest
-from unittest.mock import patch, mock_open, MagicMock
+from unittest.mock import patch, mock_open
 import os
 import sys
 
@@ -37,8 +37,8 @@ class TestWhitelistManager(unittest.TestCase):
     @patch('os.path.exists', return_value=True)
     @patch('builtins.open', new_callable=mock_open, read_data="192.168.1.1 : 80 --> 192.168.1.2 : 443\n")
     @patch('os.chmod')
-    def test_add_to_whitelist(self, mock_open, mock_chmod, mock_exists):
-        result = add_to_whitelist("192.168.1.1 : 80 --> 192.168.1.2 : 443", 'output/blacklist.txt', {"192.168.1.1 : 80 --> 192.168.1.2 : 443"})
+    def test_add_to_blacklist(self, mock_open, mock_chmod, mock_exists):
+        result = add_to_blacklist("192.168.1.1 : 80 --> 192.168.1.2 : 443", 'output/blacklist.txt', {"192.168.1.1 : 80 --> 192.168.1.2 : 443"})
         
         # Ensure file has 600 permission
         mock_open.assert_called_with('output/blacklist.txt', 0o600)
