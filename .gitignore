@@ -1,3 +1,4 @@
 *.pcap
 __pycache__/
 .env
+filtered_files/*

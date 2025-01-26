@@ -104,7 +104,7 @@ def is_packet_allowed(packet, whitelist):
     return True
 
 def log_anomaly(anomaly, anomaly_status):
-    global ANAMOLY_LOG, ANOMALY_STATUS
+    global ANOMALY_LOG, ANOMALY_STATUS
     current_time = time.time()
     
     if anomaly in ANOMALY_LOG:

@@ -139,7 +139,6 @@ def add_to_blacklist(line, blacklist_file, existing_entries_blacklist):
 
 
 def update_from_unsorted(unsorted_file):
-    global WHITELIST, BLACKLIST, OUTPUT_FOLDER
 
     whitelist_file = os.path.join(OUTPUT_FOLDER, WHITELIST)
     blacklist_file = os.path.join(OUTPUT_FOLDER, BLACKLIST)

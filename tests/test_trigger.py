@@ -8,11 +8,9 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'Scripts')))
 
-print(sys.path)
+from trigger import load_whitelist, is_packet_allowed, log_anomaly
 
-from trigger import load_whitelist, is_packet_allowed, log_anomaly  # Now it can find trigger.py
-
-class TestPacketAnalyzer(unittest.TestCase):
+class TestPacketHandler(unittest.TestCase):
     
     @patch("builtins.open", new_callable=mock_open, read_data="192.168.1.1 : 80 --> 192.168.1.2 : 443\n")
     @patch("os.getenv", side_effect=lambda key: "test_folder" if key == "OUTPUT_FOLDER" else "whitelist.txt")
@@ -33,11 +31,12 @@ class TestPacketAnalyzer(unittest.TestCase):
         mock_file.assert_called_with("../filtered_files/unsorted.txt", "a")
     
     @patch("syslog.syslog")
-    @patch("time.time", return_value=1000)
+    @patch("time.time")
     @patch("trigger.ANOMALY_LOG") 
     def test_log_anomaly_new(self, mock_anomaly_log, mock_time, mock_syslog):
         anomaly = "Test anomaly"
         self.assertTrue(log_anomaly(anomaly, "NEW"))
+        self.assertTrue(log_anomaly(anomaly, "OLD"))
         
 if __name__ == "__main__":
     unittest.main()
