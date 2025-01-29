@@ -2,6 +2,15 @@
 
 This project is an Intrusion Detection System (IDS) built using Python. It was developed and tested on **Ubuntu 24.04.1 LTS**, with **Python 3.12.3**.
 
+## Why It Doesn't Work on Windows or macOS
+
+- **Windows**: The system relies on `syslog` for logging, which is not available on Windows. Additionally, capturing network traffic in **promiscuous mode** typically requires low-level network access that is not easily available or supported on Windows without third-party tools. As such, running the system on Windows would require substantial modifications to both the logging and packet capture logic.
+
+- **macOS**: While it's possible to run the system on macOS, **promiscuous mode** is more restrictive. macOS does not easily allow network interfaces to be switched to promiscuous mode due to system security restrictions. As a result, network packet capturing is difficult to achieve unless specific configurations are set, making it less practical for running this IDS out-of-the-box on macOS.
+
+For these reasons, the system is optimized and tested specifically for Ubuntu and Linux-based environments.
+
+
 ## Introduction
 
 This IDS is designed to detect and alert on potential security threats within a network or computer system. It is built using Python scripts and was developed in an Ubuntu environment. The system monitors real-time network traffic in promiscuous mode, identifies anomalies based on a whitelist of IP addresses and ports, and sends alerts to the user about potential attacks.
