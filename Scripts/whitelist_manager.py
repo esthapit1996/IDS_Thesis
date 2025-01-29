@@ -106,6 +106,7 @@ def add_to_whitelist(line, whitelist_file, existing_entries_whitelist):
             new_entries += 1
 
     os.chmod(whitelist_file, 0o600)
+    print(f"Permissions for {whitelist_file} changed to 600")
     print(f"\nAdded bidirectional entries to WHITELIST for: {line}\n")
     return new_entries
 
