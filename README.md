@@ -63,7 +63,7 @@ This system is an open-source solution aimed at enhancing network security by pr
 
 ## How to Use
 
-To use the Intrusion Detection System (IDS), follow these steps:
+To use the IDS, follow these steps:
 
 ### 1. Set Up the Environment
 
