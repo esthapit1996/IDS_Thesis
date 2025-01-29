@@ -10,6 +10,8 @@ The IDS uses anomaly detection techniques where traffic not matching the whiteli
 
 Additionally, the system creates a file containing detected anomalies, which can later be reviewed and used to either add the offending IP addresses and ports to a whitelist or blacklist, helping improve the accuracy of detection over time.
 
+All the important events are also logged using the `syslog` Module.
+
 ## Folder Structure
 
 Here is the directory structure for the IDS system, showing where each file should be placed:
