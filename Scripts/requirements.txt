@@ -1,5 +1,0 @@
-scapy
-subprocess
-python-dotenv
-syslog
-time
