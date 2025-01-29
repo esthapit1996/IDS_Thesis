@@ -2,4 +2,4 @@
 __pycache__/
 *.env
 filtered_files/
-BA_Notes/
+.venv/
