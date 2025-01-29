@@ -1,6 +1,0 @@
-DGA:
-https://cylab.be/blog/245/network-traffic-analysis-with-python-scapy-and-some-machine-learning?accept-cookies=1#detection-of-domain-generation-algorithms-dga
-https://www.akamai.com/glossary/what-are-dgas
-
-Empirical detecton rule:
-https://cylab.be/blog/245/network-traffic-analysis-with-python-scapy-and-some-machine-learning?accept-cookies=1#detection-of-domain-generation-algorithms-dga
