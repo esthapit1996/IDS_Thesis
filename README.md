@@ -14,7 +14,7 @@ Additionally, the system creates a file containing detected anomalies, which can
 
 Here is the directory structure for the IDS system, showing where each file should be placed:
 
-/IDS
+/IDS  
 │  
 ├── Scripts/                    
 │   ├── .env                   
