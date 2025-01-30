@@ -10,7 +10,6 @@ This project is an Intrusion Detection System (IDS) built using Python. It was d
 
 For these reasons, the system is optimized and tested specifically for Ubuntu and Linux-based environments.
 
-
 ## Introduction
 
 This IDS is designed to detect and alert on potential security threats within a network or computer system. It is built using Python scripts and was developed in an Ubuntu environment. The system monitors real-time network traffic in promiscuous mode, identifies anomalies based on a whitelist of IP addresses and ports, and sends alerts to the user about potential attacks.
@@ -46,7 +45,6 @@ Here is the directory structure for the IDS system, showing where each file shou
 └── tests/            
 |   ├── test_whitelist_manager.py  
 |  └── test_trigger.py
-
 
 ## Features
 
@@ -160,7 +158,6 @@ To run **Sorting Mode**, use the following command:
 sudo ./whitelist_manager.py 2
 ```
 
-
 **Note:** The permissions for the `whitelist.txt` and `blacklist.txt` files should be/ are set to `600` to ensure that only the owner has read and write access.
 
 ###### 6. Running Unit Tests
@@ -179,3 +176,12 @@ To get more detailed output (including individual test results), you can run the
 ```
 
 Make sure these are executable was well.
+
+### Standalone App
+
+The trigger.py script has been compiled into `trigger` using `pyinstaller` in a `venv`, a standalone executable. It includes all required dependencies and can be run directly inside the `Scripts` folder using:
+
+sudo ./dist/trigger
+
+This allows the script to function without requiring Python or additional installations.
+It still required `sudo` and does not work just by clicking yet.
