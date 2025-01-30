@@ -179,3 +179,13 @@ To get more detailed output (including individual test results), you can run the
 ```
 
 Make sure these are executable was well.
+
+
+### Standalone App
+
+The trigger.py script has been compiled into `trigger` using `pyinstaller` in a `venv`, a standalone executable. It includes all required dependencies and can be run directly inside the `Scripts` folder using:
+
+sudo ./dist/trigger
+
+This allows the script to function without requiring Python or additional installations.
+It still required `sudo` and does not work just by clicking yet.
