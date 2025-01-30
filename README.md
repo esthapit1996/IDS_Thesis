@@ -33,8 +33,9 @@ Here is the directory structure for the IDS system, showing where each file shou
 │   ├── packet_handler.py       
 │   ├── trigger.py    
 │   ├── alert_system.py       
-│   └── whitelist_manager.py  
-│
+│   ├── whitelist_manager.py  
+│   ├── dist (stand alone apps here)  
+|  └── build
 
 ├── filtered_files/             
 │   ├── blacklist.txt           
