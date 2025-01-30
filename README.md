@@ -35,17 +35,17 @@ Here is the directory structure for the IDS system, showing where each file shou
 │   ├── alert_system.py       
 │   ├── whitelist_manager.py  
 │   ├── dist (stand alone apps here)  
-|  └── build
+|   └── build
 
 ├── filtered_files/             
 │   ├── blacklist.txt           
 │   ├── whitelist.txt  
-│   ├── unsorted.txt  
+│   └── unsorted.txt  
 │
 
-└── tests/            
+├── tests/            
 |   ├── test_whitelist_manager.py  
-|  └── test_trigger.py
+|   └── test_trigger.py
 
 ## Features
 
