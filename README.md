@@ -185,4 +185,4 @@ The trigger.py script has been compiled into `trigger` using `pyinstaller` in a 
 sudo ./dist/trigger
 ```
 This allows the script to function without requiring Python or additional installations.
-It still required `sudo` and does not work just by clicking yet.
+It still requires `sudo` and does not work just by clicking yet.
