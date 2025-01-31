@@ -180,7 +180,13 @@ Make sure these are executable was well.
 
 ### Standalone App
 
-The trigger.py script has been compiled into `trigger` using `pyinstaller` in a `venv`, a standalone executable. It includes all required dependencies and can be run directly inside the `Scripts` folder using:
+The trigger.py script has been compiled into `trigger` using `pyinstaller` in a `venv`, a standalone executable. It includes all required dependencies and can be run directly inside the `Scripts` folder.
+To compile:
+```bash
+pyinstaller --onefile   --add-data "alert_system.py:."   --add-data ".env:."   trigger.py
+
+```
+To execute:
 ```bash
 sudo ./dist/trigger
 ```
