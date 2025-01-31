@@ -192,3 +192,4 @@ sudo ./dist/trigger
 ```
 This allows the script to function without requiring Python or additional installations.
 It still requires `sudo` and does not work just by clicking yet.
+Test
