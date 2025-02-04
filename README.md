@@ -198,3 +198,9 @@ Check the logs using this command:
 ```bash
 sudo journalctl -t IDS_Mailer
 ```
+
+### Investigation
+A script using ChatGPT was created using `whois` to in investigate the IPs from the unfiltered files to help decide to push an IP-Pair to blacklist or whitelist.
+```bash
+sudo ./investigate.py
+```
